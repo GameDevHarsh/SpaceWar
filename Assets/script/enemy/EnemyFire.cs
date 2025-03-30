@@ -4,44 +4,99 @@ using UnityEngine;
 
 public class EnemyFire : MonoBehaviour
 {
-    [SerializeField] private GameObject SmallBullet;
-    [SerializeField] private Transform Spawnpoint1;
-    [SerializeField] private Transform Spawnpoint2;
-    [SerializeField] private Transform Spawnpoint3;
-    [SerializeField] private Transform Spawnpoint4;
-    void Start()
+    [SerializeField] private GameObject smallBulletPrefab;
+    [SerializeField] private Transform[] spawnPoints;
+    [SerializeField] private int poolSize = 10;
+    private GameObject bulletParent;
+    public static EnemyFire instance;
+    private Queue<GameObject> bulletPool;
+    private Coroutine fireCoroutine;
+
+    void Awake()
     {
-        StartCoroutine(Starting());
+        if(instance==null)
+        {
+            instance = this;
+        }
+        InitializePool();
     }
 
-    // Update is called once per frame
-    void Update()
+    void Start()
     {
+        fireCoroutine= StartCoroutine(Starting());
     }
-    private void fire()
+
+    private void InitializePool()
     {
-        
-            Instantiate(SmallBullet, Spawnpoint1.position, Spawnpoint1.rotation);
-            Instantiate(SmallBullet, Spawnpoint2.position, Spawnpoint2.rotation);
-            Instantiate(SmallBullet, Spawnpoint3.position, Spawnpoint3.rotation);
-            Instantiate(SmallBullet, Spawnpoint4.position, Spawnpoint4.rotation);
+        bulletParent = new GameObject("Bullet Pool(mini bullets)");
+        bulletPool = new Queue<GameObject>();
+        for (int i = 0; i < poolSize; i++)
+        {
+            GameObject bullet = Instantiate(smallBulletPrefab, bulletParent.transform);
+            bullet.SetActive(false);
+            bulletPool.Enqueue(bullet);
+        }
     }
-   void StartFire()
+
+    private GameObject GetPooledBullet()
     {
-        
-            InvokeRepeating("fire", 1, 0.5f);
+        if (bulletPool.Count > 0)
+        {
+            GameObject bullet = bulletPool.Dequeue();
+            bullet.SetActive(true);
+            return bullet;
+        }
+        else
+        {
+            GameObject bullet = Instantiate(smallBulletPrefab, bulletParent.transform);
+            return bullet;
+        }
     }
-    void StopFire()
+
+    public void ReturnBulletToPool(GameObject bullet)
     {
-        CancelInvoke();
+        bullet.SetActive(false);
+        bulletPool.Enqueue(bullet);
     }
-    IEnumerator Starting()
+
+    private void Fire()
     {
-       
+        foreach (Transform spawnPoint in spawnPoints)
+        {
+            GameObject bullet = GetPooledBullet();
+            bullet.transform.position = spawnPoint.position;
+            bullet.transform.rotation = spawnPoint.rotation;
+
+            StartCoroutine(DeactivateBulletAfterTime(bullet, 4f)); // Adjust bullet lifespan
+        }
+    }
+
+    private IEnumerator DeactivateBulletAfterTime(GameObject bullet, float time)
+    {
+        yield return new WaitForSeconds(time);
+        ReturnBulletToPool(bullet);
+    }
+
+    private void StartFire()
+    {
+        InvokeRepeating(nameof(Fire), 1f, 0.5f);
+    }
+
+    private void StopFire()
+    {
+        CancelInvoke(nameof(Fire));
+    }
+
+    private IEnumerator Starting()
+    {
         StartFire();
         yield return new WaitForSeconds(6f);
         StopFire();
         yield return new WaitForSeconds(2f);
-        StartCoroutine(Starting());
+        if (fireCoroutine != null)
+        {
+            StopCoroutine(fireCoroutine);
+        }
+        fireCoroutine= StartCoroutine(Starting());
     }
 }

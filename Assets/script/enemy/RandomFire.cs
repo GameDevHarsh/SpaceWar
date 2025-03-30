@@ -6,28 +6,77 @@ public class RandomFire : MonoBehaviour
 {
     public GameObject projectile;
     public GameObject projectileStartingPos;
+    [SerializeField] private int poolSize = 10;
+    private GameObject bulletParent;
+    private Queue<GameObject> bulletPool;
+    private Coroutine fireCoroutine;
+    public static RandomFire instance;
+    void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        InitializePool();
+    }
     void Start()
     {
-        StartCoroutine(Starting());
+        fireCoroutine= StartCoroutine(Starting());
        
     }
-    void Update()
+    private void InitializePool()
     {
-        
+        bulletParent = new GameObject("Bullet Pool(Seeking bullets)");
+        bulletPool = new Queue<GameObject>();
+        for (int i = 0; i < poolSize; i++)
+        {
+            GameObject bullet = Instantiate(projectile, bulletParent.transform);
+            bullet.SetActive(false);
+            bulletPool.Enqueue(bullet);
+        }
     }
+
+    private GameObject GetPooledBullet()
+    {
+        if (bulletPool.Count > 0)
+        {
+            GameObject bullet = bulletPool.Dequeue();
+            bullet.SetActive(true);
+            return bullet;
+        }
+        else
+        {
+            GameObject bullet = Instantiate(projectile, bulletParent.transform);
+            return bullet;
+        }
+    }
+    public void ReturnBulletToPool(GameObject bullet)
+    {
+        bullet.SetActive(false);
+        bulletPool.Enqueue(bullet);
+    }
+
 
     void Fire()
     {
-        Instantiate(projectile, projectileStartingPos.transform.position, transform.rotation);
+        GameObject bullet = GetPooledBullet();
+        bullet.transform.position = projectileStartingPos.transform.position;
+        bullet.transform.rotation = transform.rotation;
+
+        StartCoroutine(DeactivateBulletAfterTime(bullet, 4f)); // Adjust bullet lifespan
+    }
+    private IEnumerator DeactivateBulletAfterTime(GameObject bullet, float time)
+    {
+        yield return new WaitForSeconds(time);
+        ReturnBulletToPool(bullet);
     }
     void StartFire()
     {
-
-        InvokeRepeating("Fire", 2, 0.3f);
+        InvokeRepeating(nameof(Fire), 2, 0.3f);
     }
     void StopFire()
     {
-        CancelInvoke("Fire");
+        CancelInvoke(nameof(Fire));
     }
     IEnumerator Starting()
     {
@@ -36,7 +85,11 @@ public class RandomFire : MonoBehaviour
         yield return new WaitForSeconds(5f);
         StopFire();
         yield return new WaitForSeconds(8f);
-        StartCoroutine(Starting());
+        if (fireCoroutine != null)
+        {
+            StopCoroutine(fireCoroutine);
+        }
+        fireCoroutine = StartCoroutine(Starting());
     }
    
 }

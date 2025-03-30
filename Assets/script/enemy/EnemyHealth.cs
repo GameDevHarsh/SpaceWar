@@ -13,18 +13,23 @@ public class EnemyHealth : MonoBehaviour
     [SerializeField] private float volume;
     private SpriteRenderer EnemySprite;
     private EnemyMovement movement;
+    private LAstFire lastFire;
     private void Awake()
     {
         EnemyCurrenthealth = StartingHealth;
         EnemySprite = this.GetComponent<SpriteRenderer>();
         movement = this.GetComponent<EnemyMovement>();
+        lastFire= this.GetComponent<LAstFire>();
     }
     public void takedamage(float damage)
     {
         EnemyCurrenthealth = Mathf.Clamp(EnemyCurrenthealth - damage, 0, StartingHealth);
         if (EnemyCurrenthealth > 0)
         {
-
+            if(EnemyCurrenthealth<3&& !lastFire.startedHellFire)
+            {
+                lastFire.StartFiring();
+            }
         }
         else
         {

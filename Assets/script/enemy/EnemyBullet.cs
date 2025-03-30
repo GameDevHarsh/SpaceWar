@@ -22,19 +22,15 @@ public class EnemyBullet : MonoBehaviour
         //transform.Translate(Vector2.down * speed * Time.deltaTime);
         if (transform.position.x == target.x && transform.position.y == target.y)
         {
-            DestroyBullet();
+            RandomFire.instance.ReturnBulletToPool(this.gameObject);
         }
     }
 
-    void DestroyBullet()
-    {
-        Destroy(gameObject);
-    }
     void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Projectile") || collision.gameObject.CompareTag("Player"))
         {
-            DestroyBullet();
+            RandomFire.instance.ReturnBulletToPool(this.gameObject);
         }
     }
 }

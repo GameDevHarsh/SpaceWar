@@ -7,26 +7,74 @@ public class Fire : MonoBehaviour
     // Start is called before the first frame update
     [SerializeField] private GameObject Bullet;
     [SerializeField] private Transform[] Spawnpoint;
+    [SerializeField] private int poolSize = 10;
+    private GameObject bulletParent;
+    public static Fire instance;
+    private Queue<GameObject> bulletPool;
+    private Coroutine fireCoroutine;
+    void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        InitializePool();
+    }
     void Start()
     {
-        StartCoroutine(StartingSpray());
+        fireCoroutine= StartCoroutine(StartingSpray());
+    }
+    private void InitializePool()
+    {
+        bulletParent = new GameObject("Bullet Pool(Green bullets)");
+        bulletPool = new Queue<GameObject>();
+        for (int i = 0; i < poolSize; i++)
+        {
+            GameObject bullet = Instantiate(Bullet, bulletParent.transform);
+            bullet.SetActive(false);
+            bulletPool.Enqueue(bullet);
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    private GameObject GetPooledBullet()
     {
+        if (bulletPool.Count > 0)
+        {
+            GameObject bullet = bulletPool.Dequeue();
+            bullet.SetActive(true);
+            return bullet;
+        }
+        else
+        {
+            GameObject bullet = Instantiate(Bullet, bulletParent.transform);
+            return bullet;
+        }
     }
+    public void ReturnBulletToPool(GameObject bullet)
+    {
+        bullet.SetActive(false);
+        bulletPool.Enqueue(bullet);
+    }
+
     private void Spray()
     {
-            Instantiate(Bullet, Spawnpoint[0].position, Spawnpoint[0].rotation);
-        Instantiate(Bullet, Spawnpoint[1].position, Spawnpoint[1].rotation);
-        Instantiate(Bullet, Spawnpoint[2].position, Spawnpoint[2].rotation);
-        Instantiate(Bullet, Spawnpoint[3].position, Spawnpoint[3].rotation);
-    }
+        foreach (Transform spawnPoint in Spawnpoint)
+        {
+            GameObject bullet = GetPooledBullet();
+            bullet.transform.position = spawnPoint.position;
+            bullet.transform.rotation = spawnPoint.rotation;
 
+            StartCoroutine(DeactivateBulletAfterTime(bullet, 4f)); // Adjust bullet lifespan
+        }
+    }
+    private IEnumerator DeactivateBulletAfterTime(GameObject bullet, float time)
+    {
+        yield return new WaitForSeconds(time);
+        ReturnBulletToPool(bullet);
+    }
     void StartSpray()
     {
-        InvokeRepeating("Spray", 0.1f, 0.05f);
+        InvokeRepeating(nameof(Spray), 0.1f, 0.05f);
     }
 
     IEnumerator StartingSpray()
@@ -36,10 +84,14 @@ public class Fire : MonoBehaviour
         yield return new WaitForSeconds(8f);
         StopSpray();
         yield return new WaitForSeconds(5f);
-        StartCoroutine(StartingSpray());
+        if (fireCoroutine != null)
+        {
+            StopCoroutine(fireCoroutine);
+        }
+        fireCoroutine = StartCoroutine(StartingSpray());
     }
     void StopSpray()
     {
-        CancelInvoke();
+        CancelInvoke(nameof(Spray));
     }
 }
