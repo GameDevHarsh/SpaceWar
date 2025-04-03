@@ -28,8 +28,9 @@
 - **Dodge incoming bullets and missiles**
 - **Survive and defeat the boss before it overwhelms you!**
 
-## 📜 Game Theme
-- **"Bullet Hell"** – Intense action-packed gameplay with challenging enemy patterns.
-
+## Installation
+- **Download** the game from https://drive.google.com/file/d/1M8mJc3A4RY8qG2z8nYkxdQU2c4NzVfbr/view?usp=drive_link.
+-  Run the game executable.
+-   Enjoy the immersive experience of **SpaceWar**!
 ---
 🌟 **If you like this project, give it a star ⭐ and follow for more!**
