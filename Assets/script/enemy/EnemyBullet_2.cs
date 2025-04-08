@@ -13,7 +13,7 @@ public class EnemyBullet_2 : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Projectile")||collision.gameObject.CompareTag("Player"))
         {
-            LAstFire.instance.ReturnBulletToPool(this.gameObject);
+            PoolingManager.instance.ReturnObjectToPool(this.gameObject);
         }
     }
 }

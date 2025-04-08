@@ -22,7 +22,7 @@ public class EnemyBullet : MonoBehaviour
         //transform.Translate(Vector2.down * speed * Time.deltaTime);
         if (transform.position.x == target.x && transform.position.y == target.y)
         {
-            RandomFire.instance.ReturnBulletToPool(this.gameObject);
+            PoolingManager.instance.ReturnObjectToPool(this.gameObject);
         }
     }
 
@@ -30,7 +30,7 @@ public class EnemyBullet : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Projectile") || collision.gameObject.CompareTag("Player"))
         {
-            RandomFire.instance.ReturnBulletToPool(this.gameObject);
+            PoolingManager.instance.ReturnObjectToPool(this.gameObject);
         }
     }
 }

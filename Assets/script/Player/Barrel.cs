@@ -7,7 +7,6 @@ public class Barrel : MonoBehaviour
     [SerializeField] float speed;
     [SerializeField]
     private Transform barreltop;
-    [SerializeField] private GameObject bullet;
     private Vector2 lookdirection;
     private float lookangle;
 
@@ -23,7 +22,15 @@ public class Barrel : MonoBehaviour
     }
     private void FireBullet()
     {
-        Instantiate(bullet, barreltop.position, barreltop.rotation);
+        GameObject bullet = PoolingManager.instance.GetObjectFromPool("Turret Bullet");
+        bullet.transform.position = barreltop.position;
+        bullet.transform.rotation = barreltop.rotation;
+        StartCoroutine(DeactivateBulletAfterTime(bullet, 4f));
+    }
+    private IEnumerator DeactivateBulletAfterTime(GameObject bullet, float time)
+    {
+        yield return new WaitForSeconds(time);
+        PoolingManager.instance.ReturnObjectToPool(bullet);
     }
     void StartFire()
     {

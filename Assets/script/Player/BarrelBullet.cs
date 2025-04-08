@@ -6,14 +6,7 @@ public class BarrelBullet : MonoBehaviour
 {
     [SerializeField] private Transform BarrelTop;
     [SerializeField] private float speed = 3f;
-    [SerializeField] private GameObject hit_effect;
     public int ScoreValue;
-    // Start is called before the first frame update
-    void Start()
-    {
-        Destroy(gameObject, 2f);
-    }
-
     // Update is called once per frame
     void Update()
     {
@@ -30,8 +23,11 @@ public class BarrelBullet : MonoBehaviour
             {
                 Score.ScoreVal += ScoreValue;
             }
-            Instantiate(hit_effect, transform.position, Quaternion.identity);
-            Destroy(gameObject);
+            GameObject explosionEffect = PoolingManager.instance.GetObjectFromPool("Big Explosion");
+            explosionEffect.transform.position = transform.position;
+            explosionEffect.transform.rotation = Quaternion.identity;
+            PoolingManager.instance.ReturnObjectToPool(this.gameObject);
         }
     }
+
 }

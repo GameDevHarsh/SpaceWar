@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyHealth : MonoBehaviour
@@ -19,17 +18,21 @@ public class EnemyHealth : MonoBehaviour
         EnemyCurrenthealth = StartingHealth;
         EnemySprite = this.GetComponent<SpriteRenderer>();
         movement = this.GetComponent<EnemyMovement>();
-        lastFire= this.GetComponent<LAstFire>();
+        lastFire = this.GetComponent<LAstFire>();
     }
     public void takedamage(float damage)
     {
         EnemyCurrenthealth = Mathf.Clamp(EnemyCurrenthealth - damage, 0, StartingHealth);
         if (EnemyCurrenthealth > 0)
         {
-            if(EnemyCurrenthealth<3&& !lastFire.startedHellFire)
+            if (lastFire != null)
             {
-                lastFire.StartFiring();
+                if (EnemyCurrenthealth < 3 && !lastFire.startedHellFire)
+                {
+                    lastFire.StartFiring();
+                }
             }
+
         }
         else
         {
@@ -62,6 +65,6 @@ public class EnemyHealth : MonoBehaviour
     }
     void FixedUpdate()
     {
-        
+
     }
 }

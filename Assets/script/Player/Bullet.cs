@@ -3,15 +3,13 @@ using UnityEngine;
 public class Bullet : MonoBehaviour
 {
     [SerializeField] private float speed = 2f;
-    [SerializeField] private GameObject shoot_effect;
-    [SerializeField] private GameObject hit_effect;
     public int ScoreValue;
-    void Start()
+    private void Start()
     {
-        GameObject obj = (GameObject)Instantiate(shoot_effect, transform.position - new Vector3(0, 0, 0), Quaternion.identity); //Spawn muzzle flash
-        Destroy(gameObject, 1.5f);
+        GameObject muzzle = PoolingManager.instance.GetObjectFromPool("Muzzle");
+        muzzle.transform.position = transform.position - new Vector3(0, 0, 0);
+        muzzle.transform.rotation = Quaternion.identity;
     }
-
     // Update is called once per frame
     void Update()
     {
@@ -27,8 +25,10 @@ public class Bullet : MonoBehaviour
             {
                 Score.ScoreVal += ScoreValue;
             }
-            Instantiate(hit_effect, transform.position, Quaternion.identity);
-            Destroy(gameObject);
+            GameObject explosionEffect = PoolingManager.instance.GetObjectFromPool("Small Explosion");
+            explosionEffect.transform.position = transform.position - new Vector3(0, 0, 0);
+            explosionEffect.transform.rotation = Quaternion.identity;
+            PoolingManager.instance.ReturnObjectToPool(this.gameObject);
         }
     }
 }

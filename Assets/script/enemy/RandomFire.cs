@@ -4,62 +4,16 @@ using UnityEngine;
 
 public class RandomFire : MonoBehaviour
 {
-    public GameObject projectile;
     public GameObject projectileStartingPos;
-    [SerializeField] private int poolSize = 10;
-    private GameObject bulletParent;
-    private Queue<GameObject> bulletPool;
     private Coroutine fireCoroutine;
-    public static RandomFire instance;
-    void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-        }
-        InitializePool();
-    }
     void Start()
     {
         fireCoroutine= StartCoroutine(Starting());
        
     }
-    private void InitializePool()
-    {
-        bulletParent = new GameObject("Bullet Pool(Seeking bullets)");
-        bulletPool = new Queue<GameObject>();
-        for (int i = 0; i < poolSize; i++)
-        {
-            GameObject bullet = Instantiate(projectile, bulletParent.transform);
-            bullet.SetActive(false);
-            bulletPool.Enqueue(bullet);
-        }
-    }
-
-    private GameObject GetPooledBullet()
-    {
-        if (bulletPool.Count > 0)
-        {
-            GameObject bullet = bulletPool.Dequeue();
-            bullet.SetActive(true);
-            return bullet;
-        }
-        else
-        {
-            GameObject bullet = Instantiate(projectile, bulletParent.transform);
-            return bullet;
-        }
-    }
-    public void ReturnBulletToPool(GameObject bullet)
-    {
-        bullet.SetActive(false);
-        bulletPool.Enqueue(bullet);
-    }
-
-
     void Fire()
     {
-        GameObject bullet = GetPooledBullet();
+        GameObject bullet = PoolingManager.instance.GetObjectFromPool("Seeking Bullet");
         bullet.transform.position = projectileStartingPos.transform.position;
         bullet.transform.rotation = transform.rotation;
 
@@ -68,7 +22,7 @@ public class RandomFire : MonoBehaviour
     private IEnumerator DeactivateBulletAfterTime(GameObject bullet, float time)
     {
         yield return new WaitForSeconds(time);
-        ReturnBulletToPool(bullet);
+        PoolingManager.instance.ReturnObjectToPool(bullet);
     }
     void StartFire()
     {

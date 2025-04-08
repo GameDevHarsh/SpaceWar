@@ -11,7 +11,7 @@ public class EnemyBulletMovementGreen : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Projectile") || collision.gameObject.CompareTag("Player"))
         {
-            Fire.instance.ReturnBulletToPool(this.gameObject);
+            PoolingManager.instance.ReturnObjectToPool(this.gameObject);
         }
     }
 }

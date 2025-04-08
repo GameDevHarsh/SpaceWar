@@ -11,7 +11,7 @@ public class EnemyBulletMovement : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Projectile") || collision.gameObject.CompareTag("Player"))
         {
-            EnemyFire.instance.ReturnBulletToPool(this.gameObject);
+            PoolingManager.instance.ReturnObjectToPool(this.gameObject);
         }
     }
 }
